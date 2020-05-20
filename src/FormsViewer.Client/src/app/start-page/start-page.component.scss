@@ -1,0 +1,21 @@
+ul{
+    list-style-type: none;
+    margin-left:-20px;
+}
+.item-box{
+    overflow-y: scroll;
+    height: 100px;
+    padding-top:10px;
+}
+
+.show{
+    flex-basis: 60em !important;
+}
+
+.width-1{
+    width:1px;
+  }
+  
+  .bold{
+    font-weight: 700;
+  }

@@ -1,0 +1,13 @@
+﻿---
+ID: "27dd8ff2-7366-4ac5-a142-87f119545848"
+Parent: "e8ed70ba-1401-4bcf-b3f9-5a60fe67c8f5"
+Template: "d4c7f5f9-8977-4e0c-b6ce-28ae8e0753e2"
+Path: /sitecore/client/Applications/Launchpad/PageSettings/Buttons/Tools/XpathBuilder
+DB: core
+Languages:
+- Language: en
+  Versions:
+  - Version: 1
+    Fields:
+    - ID: "25bed78c-4957-4165-998a-ca1b52f67497"
+      Value: "20200515T102253:637251349738510110Z"

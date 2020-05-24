@@ -3,8 +3,8 @@ module.exports = {
     res.json({
       "FormId": "886a64f3-80c3-4083-bf3b-ae4765837ad4",
       "SuccessSubmits": 3,
-      "SubmitsCount": 3,
-      "Errors": 0,
+      "SubmitsCount": 4,
+      "Errors": 1,
       "Dropouts": 1,
       "Visits": 4,
       "DropoutRate": 25

@@ -10,75 +10,44 @@
   <div scPageAppHeader>
     <sc-application-header text="Sitecore Forms Data Viewer"></sc-application-header>
   </div>
+  <div scPageActionBar>
+    <sc-action-bar>
+      <sc-action-bar-left>
+        <div class="col-1">
+          <p style="padding-top:6px; font-size:14px"><strong>Forms</strong></p>
+        </div>
+        <div class="col-2">
+          <select id="database" [(ngModel)]="selectedForm" class="form-control" (change)="loadForms()">
+            <option *ngFor="let c of forms" [value]="c.Id">{{ c.Name }}</option>
+          </select>
+        </div>
+        <div class="col-1">
+          <p style="padding-top:6px; font-size:14px"><strong>Start Date</strong></p>
+        </div>
+        <div class="col-2">
+          <input type="date" [(ngModel)]="startDate" class="form-control" (change)="loadForms()"/>
+        </div>
+        <div class="col-1">
+          <p style="padding-top:6px; font-size:14px"><strong>End Date</strong></p>
+        </div>
+        <div class="col-2">
+          <input type="date" [(ngModel)]="endDate" class="form-control" (change)="loadForms()"/>
+        </div>
+        <div class="col-1">
+          <button scButton="primary" (click)="dialogService.open(export)">Export</button>
+        </div>
+      </sc-action-bar-left>
+      <sc-action-bar-right>
+        <button type="button" scIconButton [(scToggle)]="isEditing" (click)="loadChart()">
+          <sc-icon size="small" icon="context_toggle"></sc-icon>
+        </button>
+      </sc-action-bar-right>
+    </sc-action-bar>
+  </div>
+
   <article scPageContent class="p-4">
     <div class="card mb-3">
-      <div class="card-block" >
-        <div class="row">
-          <div class="col-2">
-            <div class="row">
-              <div class="col-4">
-                <p style="padding-top:6px; font-size:14px"><strong>Forms</strong></p>
-              </div>
-              <div class="col-8">
-                <select id="database" [(ngModel)]="selectedForm" class="form-control" (change)="loadForms()">
-                  <option *ngFor="let c of forms" [value]="c.Id">{{ c.Name }}</option>
-                </select>
-              </div>
-    
-              
-            </div>
-            <div class="row">
-              <div class="col-4">
-                <p style="padding-top:6px; font-size:14px"><strong>Start Date</strong></p>
-              </div>
-              <div class="col-8">
-                <input type="date" [(ngModel)]="startDate" class="form-control" (change)="loadForms()"/>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-4">
-                <p style="padding-top:6px; font-size:14px"><strong>End Date</strong></p>
-              </div>
-              <div class="col-8">
-                <input type="date" [(ngModel)]="endDate" class="form-control" (change)="loadForms()"/>
-              </div>
-            </div>
-            <br>
-           
-            <div class="row" *ngIf="errorMessage">
-              <div class="col-1">
-              </div>
-              <div class="col-4">
-                <p *ngIf="errorMessage"><strong style="color:red;">{{errorMessage}}</strong></p>
-              </div>
-            </div>    
-          </div>
-          <div class="col-3">
-            <p style="color:red;font-size: 14px;" class="bold" *ngIf="formStatistics.SuccessSubmits && formStatistics.SuccessSubmits<0">Xdb is disabled! You cannot retrieve the form analytics data</p>
-            <table scTable *ngIf="formStatistics.SuccessSubmits && formStatistics.SuccessSubmits>-1">
-              <thead>
-                <tr>
-                  <th class="width-1">Success submit</th>
-                  <th class="width-1">Submit Count</th>
-                  <th class="width-1">Errors</th>
-                  <th class="width-1">Visits</th>
-                  <th class="width-1"> Drop outs</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{{formStatistics.SuccessSubmits}}</td>
-                  <td>{{formStatistics.SubmitsCount}}</td>
-                  <td>{{formStatistics.Errors}}</td>
-                  <td>{{formStatistics.Visits}}</td>
-                  <td>{{formStatistics.Dropouts}}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-      </div>
+      
     </div>
 
 
@@ -110,544 +79,79 @@
       </sc-progress-indicator-panel>
     </div>
   </article>
-  <aside scPageContext [show]="isEditing" class="bg-basic-white">
+  <aside scPageContext [show]="isEditing" class="bg-basic-white" >
     <div class="p3">
-      <table scTable>
-        <tbody>
-          <tr>
-            <td colspan="2" width="52%">
-              <p><strong>Item Attributes</strong></p>
-            </td>
-            <td colspan="2" width="47%">
-              <p><strong>Common Standard Template Fields</strong></p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>@@name</p>
-            </td>
-            <td width="25%">
-              <p>Case sensitive</p>
-            </td>
-            <td width="23%">
-              <p>@__Display name</p>
-            </td>
-            <td width="24%">
-              <p>Display name</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>@@key</p>
-            </td>
-            <td width="25%">
-              <p>ToLower(@@name)</p>
-            </td>
-            <td width="23%">
-              <p>@__Updated</p>
-            </td>
-            <td width="24%">
-              <p>Update date/time</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>@@templateid</p>
-            </td>
-            <td width="25%">
-              <p>Template ID</p>
-            </td>
-            <td width="23%">
-              <p>@__Updated by</p>
-            </td>
-            <td width="24%">
-              <p>Case sensitive username</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>@@templatename</p>
-            </td>
-            <td width="25%">
-              <p>Case sensitive</p>
-            </td>
-            <td width="23%">
-              <p>@__Created</p>
-            </td>
-            <td width="24%">
-              <p>Creation date/time</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>@@templatekey</p>
-            </td>
-            <td width="25%">
-              <p>ToLower(@@templatename)</p>
-            </td>
-            <td width="23%">
-              <p>@__Created by</p>
-            </td>
-            <td width="24%">
-              <p>Case sensitive username</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>@@id</p>
-            </td>
-            <td width="25%">
-              <p>Item ID</p>
-            </td>
-            <td width="23%">
-              <p>@__Lock</p>
-            </td>
-            <td width="24%">
-              <p>Lock owner</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>@@masterid</p>
-            </td>
-            <td width="25%">
-              <p>Branch template used</p>
-            </td>
-            <td width="23%">
-              <p>@__Workflow state</p>
-            </td>
-            <td width="24%">
-              <p>Workflow state ID</p>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2" width="52%">
-              <p><strong>Supported Functions</strong></p>
-            </td>
-            <td width="23%">
-              <p>@__Publish</p>
-            </td>
-            <td width="24%">
-              <p>Item publish date</p>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2" width="52%">
-              <p>contains('does this string', 'this string')</p>
-            </td>
-            <td width="23%">
-              <p>@__Unpublish</p>
-            </td>
-            <td width="24%">
-              <p>Item unpub. Date</p>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2" width="52%">
-              <p>startswith('does this string', 'this string')</p>
-            </td>
-            <td width="23%">
-              <p>@__Valid to</p>
-            </td>
-            <td width="24%">
-              <p>Version publish date</p>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2" width="52%">
-              <p>endswith('does this string', 'this string')</p>
-            </td>
-            <td width="23%">
-              <p>@__Valid from</p>
-            </td>
-            <td width="24%">
-              <p>Version unpublish date</p>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2" width="52%">
-              <p>not(condition)</p>
-            </td>
-            <td width="23%">
-              <p>@__Never publish</p>
-            </td>
-            <td width="24%">
-              <p>Prevent item publication</p>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="2" width="52%">
-              <p>position()</p>
-            </td>
-            <td width="23%">
-              <p>@__Renderings</p>
-            </td>
-            <td width="24%">
-              <p>Layout details</p>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="4" width="100%">
-              <p><strong>Axes</strong></p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>ancestor</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Ancestors of item</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>ancestor-or-self</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Item and its ancestors</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>child (/*)</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Children of item</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>descendant (//*)</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Descendants of item</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>descendant-or-self</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Item and its descendants</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>following</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Siblings sorted after item</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>parent</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Parent of item</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>preceding</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Siblings sorted before item</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>self (.)</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Item</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>[index]</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Position index: *[5] gets the fifth child</p>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="4" width="100%">
-              <p><strong>Operators</strong></p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>and</p>
-            </td>
-            <td width="25%">
-              <p>And</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>/*/content//*[@@templateid='&lt;ID&gt;' and key='home']</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>or</p>
-            </td>
-            <td width="25%">
-              <p>Or</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>../*[@@templateid='&lt;ID&gt;' or key='home']</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>xor</p>
-            </td>
-            <td width="25%">
-              <p>Exclusive or</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>Equivalent to and not()</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>|</p>
-            </td>
-            <td width="25%">
-              <p>Catenation</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>/*/content//*|/sitecore /media library//*</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>+</p>
-            </td>
-            <td width="25%">
-              <p>Addition</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>-</p>
-            </td>
-            <td width="25%">
-              <p>Subtraction</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>*</p>
-            </td>
-            <td width="25%">
-              <p>Multiplication</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>div</p>
-            </td>
-            <td width="25%">
-              <p>Division</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>mod</p>
-            </td>
-            <td width="25%">
-              <p>Modulus (remainder)</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>/*/content//*[@IntField mod 2 = 1]</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>=</p>
-            </td>
-            <td width="25%">
-              <p>Equal comparison</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>!=</p>
-            </td>
-            <td width="25%">
-              <p>Not equal comparison</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>&lt;&nbsp;</p>
-            </td>
-            <td width="25%">
-              <p>Less than</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>&lt;=</p>
-            </td>
-            <td width="25%">
-              <p>Less than or equal to</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>&gt;&nbsp;</p>
-            </td>
-            <td width="25%">
-              <p>Greater than</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>&gt;=</p>
-            </td>
-            <td width="25%">
-              <p>Greater than or equal to</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>false</p>
-            </td>
-            <td width="25%">
-              <p>Evaluates to false</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>&nbsp;</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>true</p>
-            </td>
-            <td width="25%">
-              <p>Evaluates to true</p>
-            </td>
-            <td colspan="2" width="47%">
-              <p>Equivalent to not(false)</p>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="4" width="100%">
-              <p>Prototypes</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>Item selected in field</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>/*/content//*[contains(@ChecklistMultilistTreelistOrTreelistExField, '&lt;ItemID&gt;']</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>Escape Item/Field Names</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>/*/content//#item-name#[@#field-name#='value']</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>Date Comparison</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>/*/content/*[@__Updated &gt; 'yyyyMMddTHHmmss']</p>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="4" width="100%">
-              <p>APIs</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>Sitecore.Data.Database</p>
-              <p>Sitecore.Data.Items.Item.Axes</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>SelectItems()</p>
-              <p>SelectSingleItem()</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>Sitecore.Data.Query.Query</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Execute()</p>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="4" width="100%">
-              <p>Legend</p>
-            </td>
-          </tr>
-          <tr>
-            <td width="26%">
-              <p>Red text</p>
-            </td>
-            <td colspan="3" width="73%">
-              <p>Escape with hash characters (#) when value appears in item name or field name</p>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="col-3" *ngIf="formStatistics">
+        <p style="color:red;font-size: 14px;" class="bold" *ngIf="formStatistics.SuccessSubmits && formStatistics.SuccessSubmits<0">Xdb is disabled! You cannot retrieve the form analytics data</p>
+        <table scTable *ngIf="formStatistics.SuccessSubmits && formStatistics.SuccessSubmits>-1">
+          <thead>
+            <tr>
+              <th class="width-1">Success submit</th>
+              <th class="width-1">Submit Count</th>
+              <th class="width-1">Errors</th>
+              <th class="width-1">Visits</th>
+              <th class="width-1"> Drop outs</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{formStatistics.SuccessSubmits}}</td>
+              <td>{{formStatistics.SubmitsCount}}</td>
+              <td>{{formStatistics.Errors}}</td>
+              <td>{{formStatistics.Visits}}</td>
+              <td>{{formStatistics.Dropouts}}</td>
+            </tr>
+          </tbody>
+        </table>
+       
+      </div>
+      
+    </div>
+    <div style="width: 300px;display:block;padding-left:30px">
+      <canvas id="myChart" width="300" height="400"></canvas>
     </div>
   </aside>
 </sc-page>
 
 
+<template #export>
+  <sc-dialog>
+    <sc-dialog-header>
+      <h4>Export</h4>
+    </sc-dialog-header>
+    <sc-dialog-body>
+      <h2>Export Type</h2>
+      <div class="row">
+        <div class="col-2">
+          <label class="container-rb"><input type="radio" name="mode" value="csv" [(ngModel)]="exportType">&nbsp; CSV  <span class="checkmark-rb"></span></label>
+        </div>
+        <div class="col-2">
+          <label class="container-rb"><input type="radio" name="mode" value="xml" [(ngModel)]="exportType">&nbsp; XML<span class="checkmark-rb"></span></label>
+        </div>
+        <div class="col-2">
+          <label class="container-rb"><input type="radio" name="mode" value="excel" [(ngModel)]="exportType">&nbsp; Excel<span class="checkmark-rb"></span></label>
+        </div>
+      </div>
+      <h2>Include fields</h2>
+      <div class="row" *ngIf="parent.formEntries">
+        <div class="col-3" *ngFor='let option of parent.options'>
+         
+          <label class="container" >{{option.name}}
+            <input type="checkbox" name="options" value="{{option.value}}"
+            [(ngModel)]="option.checked">
+            <span class="checkmark"></span>
+          </label>   
+        <!-- <label  *ngFor='let header of formEntries.Headers'><input type="checkbox" name="header"  value="header" [(ngModel)]="exportFields">&nbsp; {{header}}</label> -->
+      </div>
+      </div>
+    
+
+    </sc-dialog-body>
+    <sc-dialog-footer>
+      <button scButton scDialogClose>Close</button>
+      <button scButton="primary" (click)="alertAndClose()">Export</button>
+    </sc-dialog-footer>
+  </sc-dialog>
+</template>
 
 
-
-<ng-template #recursiveListTmpl2 let-list>
-  <li *ngFor="let item of list">
-    <img (click)="loadChildren(item)" *ngIf="!checkState(item) && item.HasChildren"
-      src="/sitecore/shell/themes/standard/images/treemenu_collapsed.png" />
-    <img (click)="loadChildren(item)" *ngIf="checkState(item) && item.HasChildren"
-      src="/sitecore/shell/themes/standard/images/treemenu_expanded.png" />
-    <img *ngIf="!item.HasChildren" src="/sitecore/shell/themes/standard/images/noexpand15x15.gif" />
-    <a (click)="loadData(item)" href="#"><img height="16" width="16" src="{{item.Icon}}" /> {{ item.Name }} </a>
-    <ul>
-      <ng-container *ngTemplateOutlet="recursiveListTmpl2; context:{ $implicit: item.Children }"></ng-container>
-    </ul>
-  </li>
-</ng-template>

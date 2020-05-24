@@ -33,6 +33,7 @@
     "@speak/ng-sc-cli": "~0.3.1",
     "@speak/styling": "~0.8.1",
     "@types/highlight.js": "^9.12.3",
+    "chart.js": "^2.9.3",
     "core-js": "^2.4.1",
     "zone.js": "^0.8.14"
   },
@@ -40,6 +41,7 @@
     "@angular/cli": "1.2.7",
     "@angular/compiler-cli": "4.3.6",
     "@angular/language-service": "4.3.6",
+    "@types/chart.js": "^2.9.21",
     "@types/jasmine": "~2.5.53",
     "@types/jasminewd2": "~2.0.2",
     "@types/node": "~6.0.60",

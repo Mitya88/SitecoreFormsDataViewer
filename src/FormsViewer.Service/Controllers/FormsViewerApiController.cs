@@ -14,9 +14,15 @@
     using Sitecore.Services.Infrastructure.Web.Http;
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Web.Http;
     using System.Web.Http.Cors;
+    using System.Xml;
+    using System.Xml.Serialization;
 
     //[Authorize]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
@@ -128,6 +134,99 @@
             return provider.GetFormStatistics(request.FormId, 
                 request.StartDate.HasValue ? request.StartDate.Value : DateTime.MinValue, 
                 request.EndDate.HasValue ? request.EndDate.Value : DateTime.MaxValue);
+        }
+
+        [HttpPost]
+
+        public HttpResponseMessage ExportFormData([FromBody]FormViewExportRequest request)
+        {
+            string formName = "sample";
+            string fileName = string.Format("Export_{0}_{1}.csv", formName, DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+            MemoryStream stream = new MemoryStream();
+            StreamWriter writer = new StreamWriter(stream);
+            writer.Write(CreateReport(request));
+            writer.Flush();
+            stream.Position = 0;
+
+            HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+            result.Content = new StreamContent(stream);
+            //result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/xml");
+            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = fileName };
+            return result;
+        }
+
+        private string CreateReport(FormViewExportRequest request)
+        {
+            string result = string.Empty;
+
+            var provider = new SqlFormDataProvider(new SqlServerApiFactory(new SqlConnectionSettings(new FormsConfigurationSettings())));
+
+            var entries = provider.GetEntries(request.FormId, request.StartDate, request.EndDate);
+
+            var response = new FormsViewerResponse();
+
+            response.Entries = new List<List<string>>();
+            foreach (var entry in entries)
+            {
+                List<string> rowData = new List<string>();
+
+                // Add to the first place the created date.
+                rowData.Add(entry.Created.ToString());
+                foreach (var header in request.Fields)
+                {
+                    var field = entry.Fields.FirstOrDefault(t => t.FieldName == header);
+                    string value = string.Empty;
+                    if (field == null)
+                    {
+                        value = "-";
+                    }
+                    else if (field.ValueType.Equals("System.Collections.Generic.List`1[Sitecore.ExperienceForms.Data.Entities.StoredFileInfo]", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (field.Value.Contains(','))
+                        {
+                            foreach (var file in field.Value.Split(',').Where(t => !string.IsNullOrEmpty(t)))
+                            {
+                                value += string.Format("<a target=\"_blank\" href=\"{0}\">Download</a><br>", Sitecore.Web.WebUtil.GetFullUrl(string.Format(FileDownloadPattern, file)));
+                            }
+                        }
+                        else
+                        {
+                            value = string.Format("<a target=\"_blank\" href=\"{0}\">Download</a>", Sitecore.Web.WebUtil.GetFullUrl(string.Format(FileDownloadPattern, field.Value)));
+                        }
+                    }
+                    else
+                    {
+                        value = field.Value;
+                    }
+
+                    rowData.Add(value);
+                }
+
+                response.Entries.Add(rowData);
+            }
+
+
+            // TODO: export response.entries..
+
+            if (request.ExportOption.Equals("xml", StringComparison.OrdinalIgnoreCase))
+            {
+                XmlSerializer x = new XmlSerializer(response.Entries.GetType());
+                var xml = "";
+
+                using (var sww = new StringWriter())
+                {
+                    using (XmlWriter writer = XmlWriter.Create(sww))
+                    {
+                        x.Serialize(writer, response.Entries);
+                        xml = sww.ToString(); 
+                    }
+                }
+
+                return xml;
+            }
+
+            return result;
         }
     }
 }

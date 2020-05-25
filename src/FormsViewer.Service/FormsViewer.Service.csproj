@@ -545,6 +545,7 @@
     <Compile Include="Controllers\FormsViewerApiController.cs" />
     <Compile Include="DI\RegisterContainer.cs" />
     <Compile Include="Models\Form.cs" />
+    <Compile Include="Models\FormViewExportRequest.cs" />
     <Compile Include="Models\FormViewRequest.cs" />
     <Compile Include="Models\FormViewResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

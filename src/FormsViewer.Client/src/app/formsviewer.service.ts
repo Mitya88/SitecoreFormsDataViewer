@@ -25,4 +25,8 @@ export class FormsViewerService {
   fetchFormStatistics(formId:string, startDate:Date, endDate:Date) {
     return this.httpClient.post(this.baseUrl+'/statistics?sc_site=shell', { FormId:formId, StartDate:startDate, EndDate:endDate});
   }
+
+  exportFormData(formId:string, startDate:Date, endDate:Date, exportOption:string, fields:any){
+    return this.httpClient.post(this.baseUrl+'/exportformdata?sc_site=shell', { FormId:formId, StartDate:startDate, EndDate:endDate, ExportOption:exportOption, Fields:fields}, {responseType:'blob'});
+  }
 }

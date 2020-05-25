@@ -104,6 +104,13 @@ export class StartPageComponent implements OnInit {
     console.log(this.exportType);
     this.exportFields = this.selectedOptions();
     console.log(this.exportFields)
+
+    this.formsViewerService.exportFormData(this.selectedFormId, this.startDate, this.endDate, this.exportType, this.exportFields).subscribe({
+      next: response => {
+        console.log(response);
+        
+      }
+    });
   }
 
   selectedOptions() { // right now: ['1','3']
@@ -122,16 +129,14 @@ export class StartPageComponent implements OnInit {
     });
   }
 
-  selectForm(form: any) {
-    this.selectedForm = form;
-    this.selectedFormId = form.Id;
-  }
+ 
 
   formEntries: any;
   formStatistics: any;
   statisticsLoading = false;
   options = [];
   loadForms() {
+    this.selectedFormId = this.selectedForm;
     this.isLoading = true;
     this.statisticsLoading = true;
     var result = this.formsViewerService.fetchFormDetail(this.selectedFormId, this.startDate, this.endDate).subscribe({

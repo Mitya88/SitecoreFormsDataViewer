@@ -100,19 +100,42 @@ export class StartPageComponent implements OnInit {
 
   exportType: any;
   exportFields: any;
+  blob:any;
   alertAndClose() {
     console.log(this.exportType);
     this.exportFields = this.selectedOptions();
     console.log(this.exportFields)
 
-    this.formsViewerService.exportFormData(this.selectedFormId, this.startDate, this.endDate, this.exportType, this.exportFields).subscribe({
+    this.formsViewerService.exportFormData(this.selectedFormId, this.startDate, this.endDate, this.exportType, this.exportFields)
+    .subscribe({
       next: response => {
         console.log(response);
-        
+        this.blob = response;
+        let filename = 'export.'+ this.getExtension(this.exportType);
+
+        var link = document.createElement("a");
+        // Browsers that support HTML5 download attribute
+        if (link.download !== undefined) 
+        {
+            var url = URL.createObjectURL(response);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
       }
     });
   }
 
+  getExtension(exportType:any){
+    if(exportType=='excel'){
+      return 'xls';
+    }
+
+    return exportType;
+  }
   selectedOptions() { // right now: ['1','3']
     return this.options
       .filter(opt => opt.checked)

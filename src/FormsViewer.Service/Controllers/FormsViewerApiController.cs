@@ -7,7 +7,6 @@
     using Sitecore.ExperienceForms.Analytics.Reporting;
     using Sitecore.ExperienceForms.Configuration;
     using Sitecore.ExperienceForms.Data.SqlServer;
-    using Sitecore.ExperienceForms.Diagnostics;
     using Sitecore.ExperienceForms.Reporting.Models;
     using Sitecore.Services.Infrastructure.Web.Http;
     using System;
@@ -27,7 +26,9 @@
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class FormsViewerApiController : ServicesApiController
     {
-        public const string FileDownloadPattern = "/sitecore/api/ssc/forms/formdata/formdata/DownloadFile?fileId={0}";
+        private const string FileDownloadPattern = "/sitecore/api/ssc/forms/formdata/formdata/DownloadFile?fileId={0}";
+
+        private const string IndexName = "sitecore_master_index";
 
         public FormsViewerApiController()
         {
@@ -36,7 +37,7 @@
         [HttpGet]
         public List<Form> Forms()
         {
-            var index = ContentSearchManager.GetIndex("sitecore_master_index");
+            var index = ContentSearchManager.GetIndex(IndexName);
             var response = new List<Form>();
             using (var searchContext = index.CreateSearchContext())
             {
@@ -58,26 +59,23 @@
         [HttpPost]
         public FormsViewerResponse Detail([FromBody]FormViewRequest request)
         {
-            //var provider = new SqlFormDataProvider
-            //    (new SqlConnectionSettings(new FormsConfigurationSettings()),
-            //    new Logger(),
-            //    new FormDataParser(),
-            //    new FormFieldDataConverter());
-
             var provider = new SqlFormDataProvider(new SqlServerApiFactory(new SqlConnectionSettings(new FormsConfigurationSettings())));
-
             var result = provider.GetEntries(request.FormId, request.StartDate, request.EndDate);
 
-            var response = new FormsViewerResponse();
-            response.Headers = result.SelectMany(t => t.Fields).Select(t => t.FieldName).Distinct().ToList();
-            
-            response.Entries = new List<List<string>>();
+
+            var response = new FormsViewerResponse
+            {
+                Headers = result.SelectMany(t => t.Fields).Select(t => t.FieldName).Distinct().ToList(),
+                Entries = new List<List<string>>()
+            };
+
             foreach (var entry in result)
             {
                 List<string> rowData = new List<string>();
 
                 // Add to the first place the created date.
                 rowData.Add(entry.Created.ToString());
+
                 foreach (var header in response.Headers)
                 {
                     var field = entry.Fields.FirstOrDefault(t => t.FieldName == header);
@@ -178,7 +176,14 @@
                     string value = string.Empty;
                     if (field == null)
                     {
-                        value = "-";
+                        if (header.Equals("Created"))
+                        {
+                            value = entry.Created.ToString();
+                        }
+                        else
+                        {
+                            value = "-";
+                        }
                     }
                     else if (field.ValueType.Equals("System.Collections.Generic.List`1[Sitecore.ExperienceForms.Data.Entities.StoredFileInfo]", StringComparison.OrdinalIgnoreCase))
                     {
@@ -218,12 +223,13 @@
                     using (XmlWriter writer = XmlWriter.Create(sww))
                     {
                         x.Serialize(writer, response.Entries);
-                        xml = sww.ToString(); 
+                        xml = sww.ToString();
                     }
                 }
 
                 return xml;
-            } else if(request.ExportOption.Equals("excel", StringComparison.OrdinalIgnoreCase))
+            }
+            else if (request.ExportOption.Equals("excel", StringComparison.OrdinalIgnoreCase))
             {
                 StringBuilder strExcelXml = new StringBuilder();
                 //First Write the Excel Header
@@ -238,7 +244,7 @@
                 strExcelXml.Append("<Table>");
 
                 strExcelXml.Append("<tr>");
-                foreach(var field in request.Fields)
+                foreach (var field in request.Fields)
                 {
                     strExcelXml.Append(string.Format("<td>{0}</td>", field));
                 }
@@ -256,7 +262,14 @@
                         string value = string.Empty;
                         if (field == null)
                         {
-                            value = "-";
+                            if (header.Equals("Created"))
+                            {
+                                value = entry.Created.ToString();
+                            }
+                            else
+                            {
+                                value = "-";
+                            }
                         }
                         else if (field.ValueType.Equals("System.Collections.Generic.List`1[Sitecore.ExperienceForms.Data.Entities.StoredFileInfo]", StringComparison.OrdinalIgnoreCase))
                         {
@@ -289,6 +302,10 @@
 
                 return ConvertHTMLToExcelXML(strExcelXml.ToString());
 
+            }
+            else if (request.ExportOption.Equals("excel", StringComparison.OrdinalIgnoreCase))
+            {
+                //TODO
             }
 
             return result;

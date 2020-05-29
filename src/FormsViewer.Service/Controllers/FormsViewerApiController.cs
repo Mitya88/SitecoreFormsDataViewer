@@ -262,9 +262,9 @@
                         string value = string.Empty;
                         if (field == null)
                         {
-                            if (header.Equals("Created"))
+                            if (request.Fields[j].Equals("Created"))
                             {
-                                value = entry.Created.ToString();
+                                value = entries.ToList()[k].Created.ToString();
                             }
                             else
                             {
@@ -303,7 +303,7 @@
                 return ConvertHTMLToExcelXML(strExcelXml.ToString());
 
             }
-            else if (request.ExportOption.Equals("excel", StringComparison.OrdinalIgnoreCase))
+            else if (request.ExportOption.Equals("csv", StringComparison.OrdinalIgnoreCase))
             {
                 //TODO
             }

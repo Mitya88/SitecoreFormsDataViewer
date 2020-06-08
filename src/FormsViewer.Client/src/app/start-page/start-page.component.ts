@@ -56,67 +56,82 @@ export class StartPageComponent implements OnInit {
   }
 
   loadChart() {
-    this.canvas = document.getElementById('myChart');
-    this.ctx = this.canvas.getContext('2d');
-    let myChart = new Chart(this.ctx, {
-      type: 'bar',
-      data: {
-        labels: ["Success submits", "Submit Count", "Errors", "Visits", "DropOuts"],
-        datasets: [{
-          label: 'Form statistics',
-          data: [this.formStatistics.SuccessSubmits, this.formStatistics.SubmitsCount, this.formStatistics.Errors, this.formStatistics.Visits, this.formStatistics.Dropouts],
-          backgroundColor: [
-            'rgba(66, 245, 69)',
-            'rgba(53, 74, 53)',
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        scales: {
-          yAxes: [{
-            display: true,
-            ticks: {
-              suggestedMin: 0,
-              stepSize:1
-              
-            }
-          }]
-        },
-        title: {
-          display: true,
-          text: 'Form Analytics'
-        }
-        , legend: {
-          display:false
-        }
-      }
+    if (!this.settings.XDbEnabled) {
+      return;
     }
-    );
+
+    if (this.settings && this.settings.XDbEnabled == true) {
+      this.formsViewerService.fetchFormStatistics(this.selectedFormId, this.startDate, this.endDate).subscribe({
+        next: response => {
+          this.formStatistics = response;
+          this.isLoading = false;
+          this.statisticsLoading = false;
+
+          this.canvas = document.getElementById('myChart');
+          this.ctx = this.canvas.getContext('2d');
+          let myChart = new Chart(this.ctx, {
+            type: 'bar',
+            data: {
+              labels: ["Success submits", "Submit Count", "Errors", "Visits", "DropOuts"],
+              datasets: [{
+                label: 'Form statistics',
+                data: [this.formStatistics.SuccessSubmits, this.formStatistics.SubmitsCount, this.formStatistics.Errors, this.formStatistics.Visits, this.formStatistics.Dropouts],
+                backgroundColor: [
+                  'rgba(66, 245, 69)',
+                  'rgba(53, 74, 53)',
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                yAxes: [{
+                  display: true,
+                  ticks: {
+                    suggestedMin: 0,
+                    stepSize: 1
+
+                  }
+                }]
+              },
+              title: {
+                display: true,
+                text: 'Form Analytics'
+              }
+              , legend: {
+                display: false
+              }
+            }
+          }
+          );
+        }
+      });
+    }
+
+
   }
 
   exportType: any;
   exportFields: any;
-  blob:any;
+  blob: any;
   alertAndClose() {
     console.log(this.exportType);
     this.exportFields = this.selectedOptions();
     console.log(this.exportFields)
 
     this.formsViewerService.exportFormData(this.selectedFormId, this.startDate, this.endDate, this.exportType, this.exportFields)
-    .subscribe({
-      next: response => {
-        console.log(response);
-        this.blob = response;
-        let filename = 'export.'+ this.getExtension(this.exportType);
+      .subscribe({
+        next: response => {
+          console.log(response);
+          this.blob = response;
+          let filename = 'export.' + this.getExtension(this.exportType);
 
-        var link = document.createElement("a");
-        // Browsers that support HTML5 download attribute
-        if (link.download !== undefined) 
-        {
+          var link = document.createElement("a");
+          // Browsers that support HTML5 download attribute
+          if (link.download !== undefined) {
             var url = URL.createObjectURL(response);
             link.setAttribute("href", url);
             link.setAttribute("download", filename);
@@ -124,13 +139,13 @@ export class StartPageComponent implements OnInit {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+          }
         }
-      }
-    });
+      });
   }
 
-  getExtension(exportType:any){
-    if(exportType=='excel'){
+  getExtension(exportType: any) {
+    if (exportType == 'excel') {
       return 'xls';
     }
 
@@ -143,16 +158,24 @@ export class StartPageComponent implements OnInit {
   }
 
   forms: any;
+  settings: any;
   initFormsDropdown() {
     this.list2 = { items: [] };
-    var result = this.formsViewerService.fetchForms().subscribe({
+    this.formsViewerService.fetchForms().subscribe({
       next: response => {
         this.forms = response;
       }
     });
+
+
+    this.formsViewerService.settings().subscribe({
+      next: response => {
+        this.settings = response;
+      }
+    });
   }
 
- 
+
 
   formEntries: any;
   formStatistics: any;
@@ -167,23 +190,14 @@ export class StartPageComponent implements OnInit {
         this.formEntries = response;
         this.isLoading = false;
         console.log(this.formEntries.Headers);
+        this.options = [];
         for (var i = 0; i < this.formEntries.Headers.length; i++) {
           this.options.push({ name: this.formEntries.Headers[i], value: this.formEntries.Headers[i], checked: true });
         }
         console.log(this.options);
       }
     });
+    console.log(this.settings);
 
-    this.formsViewerService.fetchFormStatistics(this.selectedFormId, this.startDate, this.endDate).subscribe({
-      next: response => {
-        this.formStatistics = response;
-        this.isLoading = false;
-        this.statisticsLoading = false;
-
-        if (this.isEditing) {
-          this.loadChart();
-        }
-      }
-    });
   }
 }

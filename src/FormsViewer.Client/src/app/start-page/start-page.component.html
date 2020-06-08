@@ -81,9 +81,10 @@
   </article>
   <aside scPageContext [show]="isEditing" class="bg-basic-white" >
     <div class="p3">
-      <div class="col-3" *ngIf="formStatistics">
-        <p style="color:red;font-size: 14px;" class="bold" *ngIf="formStatistics.SuccessSubmits && formStatistics.SuccessSubmits<0">Xdb is disabled! You cannot retrieve the form analytics data</p>
-        <table scTable *ngIf="formStatistics.SuccessSubmits && formStatistics.SuccessSubmits>-1">
+      <p style="color:red;font-size: 14px;padding:5px;" class="bold" *ngIf="settings && !settings.XDbEnabled">Xdb is disabled! You cannot retrieve the form analytics data</p>
+      <div class="col-3" >
+       
+        <table scTable *ngIf="formStatistics && formStatistics.SuccessSubmits && formStatistics.SuccessSubmits>-1">
           <thead>
             <tr>
               <th class="width-1">Success submit</th>
@@ -120,8 +121,30 @@
       <h4>Export</h4>
     </sc-dialog-header>
     <sc-dialog-body>
-      <h2>Export Type</h2>
+      
       <div class="row">
+        <div class="col-3">
+          <h5>Start Date</h5>
+        </div>
+        <div class="col-1"></div>
+        <div class="col-3">
+        <h5>End Date</h5> 
+        </div>
+      </div>
+      <br>
+      <div class="row">
+        <div class="col-3">
+          <input type="date" class="form-control" [(ngModel)]="startDate"/>
+        </div>
+        <div class="col-1"></div>
+        <div class="col-3">
+          <input type="date" class="form-control" [(ngModel)]="endDate"/>
+        </div>
+      </div>
+      <br>
+      <h5>Export Type</h5>
+      <div class="row">
+        
         <div class="col-2">
           <label class="container-rb"><input type="radio" name="mode" value="csv" [(ngModel)]="exportType">&nbsp; CSV  <span class="checkmark-rb"></span></label>
         </div>
@@ -132,7 +155,7 @@
           <label class="container-rb"><input type="radio" name="mode" value="excel" [(ngModel)]="exportType">&nbsp; Excel<span class="checkmark-rb"></span></label>
         </div>
       </div>
-      <h2>Include fields</h2>
+      <h5>Include fields</h5>
       <div class="row" *ngIf="parent.formEntries">
         <div class="col-3" *ngFor='let option of parent.options'>
          

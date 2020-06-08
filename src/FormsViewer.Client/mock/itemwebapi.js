@@ -1,5 +1,16 @@
 module.exports = {
-  'POST /sitecore/api/ssc/formsviewerapi/statistics': function (req, res) {
+    'GET /sitecore/api/ssc/formsviewerapi/settings': function (req, res) {
+        res.json({
+          "XDbEnabled": true,
+          "SuccessSubmits": 3,
+          "SubmitsCount": 4,
+          "Errors": 1,
+          "Dropouts": 1,
+          "Visits": 4,
+          "DropoutRate": 25
+      });
+      },
+    'POST /sitecore/api/ssc/formsviewerapi/statistics': function (req, res) {
     res.json({
       "FormId": "886a64f3-80c3-4083-bf3b-ae4765837ad4",
       "SuccessSubmits": 3,

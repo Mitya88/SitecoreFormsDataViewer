@@ -515,12 +515,15 @@
   <ItemGroup>
     <Compile Include="Controllers\FormsViewerApiController.cs" />
     <Compile Include="DI\RegisterContainer.cs" />
+    <Compile Include="Helpers\ExcelHelper.cs" />
     <Compile Include="Models\Form.cs" />
     <Compile Include="Models\FormViewExportRequest.cs" />
     <Compile Include="Models\FormViewRequest.cs" />
     <Compile Include="Models\FormViewResponse.cs" />
+    <Compile Include="Models\SettingsResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegisterHttpRoutes.cs" />
+    <Compile Include="Services\ExportService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Config\Include\Rainbow.config" />

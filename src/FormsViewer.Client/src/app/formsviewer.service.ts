@@ -26,6 +26,10 @@ export class FormsViewerService {
     return this.httpClient.post(this.baseUrl+'/statistics?sc_site=shell', { FormId:formId, StartDate:startDate, EndDate:endDate});
   }
 
+  settings(){
+    return this.httpClient.get(this.baseUrl+'/settings');
+  }
+
   exportFormData(formId:string, startDate:Date, endDate:Date, exportOption:string, fields:any){
     return this.httpClient.post(this.baseUrl+'/exportformdata?sc_site=shell', { FormId:formId, StartDate:startDate, EndDate:endDate, ExportOption:exportOption, Fields:fields}, {responseType:'blob'});
   }

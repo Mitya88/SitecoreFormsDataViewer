@@ -1,6 +1,7 @@
 ﻿namespace FormsViewer.Service.Controllers
 {
     using FormsViewer.Service.Models;
+    using FormsViewer.Service.Services;
     using Sitecore.Configuration;
     using Sitecore.ContentSearch;
     using Sitecore.ContentSearch.SearchTypes;
@@ -115,17 +116,20 @@
             return response;
         }
 
+        [HttpGet]
+        public SettingsResponse Settings()
+        {
+            var response = new SettingsResponse
+            {
+                XDbEnabled = Sitecore.Configuration.Settings.GetBoolSetting("Xdb.Enabled", false)
+            };
+
+            return response;
+        }
+
         [HttpPost]
         public FormStatistics Statistics([FromBody]FormViewRequest request)
         {
-            if (!Settings.GetBoolSetting("Xdb.Enabled", false))
-            {
-                return new FormStatistics
-                {
-                    SuccessSubmits = -1
-                };
-            }
-
             var provider  = new FormStatisticsProvider(new ReportingQueryFactory(new ReportDataProviderFactory()));
 
             return provider.GetFormStatistics(request.FormId, 
@@ -137,6 +141,7 @@
 
         public HttpResponseMessage ExportFormData([FromBody]FormViewExportRequest request)
         {
+            
             string formName = "sample";
             string fileName = string.Format("Export_{0}_{1}.csv", formName, DateTime.Now.ToString("yyyyMMdd_HHmmss"));
             MemoryStream stream = new MemoryStream();
@@ -155,6 +160,7 @@
 
         private string CreateReport(FormViewExportRequest request)
         {
+            var exportService = new ExportService();
             string result = string.Empty;
 
             var provider = new SqlFormDataProvider(new SqlServerApiFactory(new SqlConnectionSettings(new FormsConfigurationSettings())));
@@ -167,9 +173,6 @@
             foreach (var entry in entries)
             {
                 List<string> rowData = new List<string>();
-
-                // Add to the first place the created date.
-                rowData.Add(entry.Created.ToString());
                 foreach (var header in request.Fields)
                 {
                     var field = entry.Fields.FirstOrDefault(t => t.FieldName == header);
@@ -210,152 +213,21 @@
                 response.Entries.Add(rowData);
             }
 
-
-            // TODO: export response.entries..
-
             if (request.ExportOption.Equals("xml", StringComparison.OrdinalIgnoreCase))
             {
-                XmlSerializer x = new XmlSerializer(response.Entries.GetType());
-                var xml = "";
-
-                using (var sww = new StringWriter())
-                {
-                    using (XmlWriter writer = XmlWriter.Create(sww))
-                    {
-                        x.Serialize(writer, response.Entries);
-                        xml = sww.ToString();
-                    }
-                }
-
-                return xml;
+                return exportService.ExportToXml(request, response.Entries.ToList());
             }
             else if (request.ExportOption.Equals("excel", StringComparison.OrdinalIgnoreCase))
             {
-                StringBuilder strExcelXml = new StringBuilder();
-                //First Write the Excel Header
-                strExcelXml.Append(ExcelHeader());
-                // Worksheet options Required only one time 
-                strExcelXml.Append(ExcelWorkSheetOptions());
-
-                // Create First Worksheet tag
-                strExcelXml.Append(
-                    "<Worksheet ss:Name=\"WorkSheet" + 1 + "\">");
-                // Then Table Tag
-                strExcelXml.Append("<Table>");
-
-                strExcelXml.Append("<tr>");
-                foreach (var field in request.Fields)
-                {
-                    strExcelXml.Append(string.Format("<td>{0}</td>", field));
-                }
-
-                strExcelXml.Append("</tr>");
-                for (int k = 0; k < entries.Count; k++)
-                {
-                    // Row Tag
-                    strExcelXml.Append("<tr>");
-                    for (int j = 0; j < request.Fields.Count; j++)
-                    {
-                        // Cell Tags
-                        strExcelXml.Append("<td>");
-                        var field = entries.ToList()[k].Fields.FirstOrDefault(t => t.FieldName == request.Fields[j]);
-                        string value = string.Empty;
-                        if (field == null)
-                        {
-                            if (request.Fields[j].Equals("Created"))
-                            {
-                                value = entries.ToList()[k].Created.ToString();
-                            }
-                            else
-                            {
-                                value = "-";
-                            }
-                        }
-                        else if (field.ValueType.Equals("System.Collections.Generic.List`1[Sitecore.ExperienceForms.Data.Entities.StoredFileInfo]", StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (field.Value.Contains(','))
-                            {
-                                foreach (var file in field.Value.Split(',').Where(t => !string.IsNullOrEmpty(t)))
-                                {
-                                    value += string.Format("<a target=\"_blank\" href=\"{0}\">Download</a>", Sitecore.Web.WebUtil.GetFullUrl(string.Format(FileDownloadPattern, file)));
-                                }
-                            }
-                            else
-                            {
-                                value = string.Format("<a target=\"_blank\" href=\"{0}\">Download</a>", Sitecore.Web.WebUtil.GetFullUrl(string.Format(FileDownloadPattern, field.Value)));
-                            }
-                        }
-                        else
-                        {
-                            value = field.Value;
-                        }
-                        strExcelXml.Append(value);
-                        strExcelXml.Append("</td>");
-                    }
-                    strExcelXml.Append("</tr>");
-                }
-                strExcelXml.Append("</Table>");
-                strExcelXml.Append("</Worksheet>");
-                // Close the Workbook tag (in Excel header 
-                // you can see the Workbook tag)
-                strExcelXml.Append("</Workbook>\n");
-
-                return ConvertHTMLToExcelXML(strExcelXml.ToString());
+                return exportService.ExportToExcel(request, entries.ToList());
 
             }
             else if (request.ExportOption.Equals("csv", StringComparison.OrdinalIgnoreCase))
             {
-                //TODO
+               return exportService.ExportToCsv(request, entries.ToList());
             }
 
             return result;
-        }
-
-        // Final Filtaration of String Code generated by above code
-        public static string ConvertHTMLToExcelXML(string strHtml)
-        {
-
-            // Just to replace TR with Row
-            strHtml = strHtml.Replace("<tr>", "<Row ss:AutoFitHeight=\"1\" >\n");
-            strHtml = strHtml.Replace("</tr>", "</Row>\n");
-
-            //replace the cell tags
-            strHtml = strHtml.Replace("<td>", "<Cell><Data ss:Type=\"String\">");
-            strHtml = strHtml.Replace("</td>", "</Data></Cell>\n");
-
-            return strHtml;
-        }
-
-        private string ExcelWorkSheetOptions()
-        {
-            // This is Required Only Once ,	But this has to go after the First Worksheet's First Table		
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            sb.Append("\n<WorksheetOptions xmlns=\"urn:schemas-microsoft-com:office:excel\">\n<Selected/>\n </WorksheetOptions>\n");
-            return sb.ToString();
-        }
-
-        private string ExcelHeader()
-
-        {
-            // Excel header
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            sb.Append("<?xml version=\"1.0\"?>\n");
-            sb.Append("<?mso-application progid=\"Excel.Sheet\"?>\n");
-            sb.Append(
-              "<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\" ");
-            sb.Append("xmlns:o=\"urn:schemas-microsoft-com:office:office\" ");
-            sb.Append("xmlns:x=\"urn:schemas-microsoft-com:office:excel\" ");
-            sb.Append("xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\" ");
-            sb.Append("xmlns:html=\"http://www.w3.org/TR/REC-html40\">\n");
-            sb.Append(
-              "<DocumentProperties xmlns=\"urn:schemas-microsoft-com:office:office\">");
-            sb.Append("</DocumentProperties>");
-            sb.Append(
-              "<ExcelWorkbook xmlns=\"urn:schemas-microsoft-com:office:excel\">\n");
-            sb.Append("<ProtectStructure>False</ProtectStructure>\n");
-            sb.Append("<ProtectWindows>False</ProtectWindows>\n");
-            sb.Append("</ExcelWorkbook>\n");
-            return sb.ToString();
-        }
+        }        
     }
 }

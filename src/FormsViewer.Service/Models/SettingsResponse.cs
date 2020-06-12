@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace FormsViewer.Service.Models
+﻿namespace FormsViewer.Service.Models
 {
     public class SettingsResponse
     {

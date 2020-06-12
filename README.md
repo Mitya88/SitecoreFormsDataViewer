@@ -1,5 +1,5 @@
-# Sitecore XPathBuilder with SPEAK3 UI
-The repository contains source code and documentation for the Sitecore XPathBuilder with SPEAK3 UI
+# Sitecore Forms Data Viewer
+The repository contains source code and documentation for the Sitecore Forms Data Viewer
 
 # Table of Contents
 * [Introduction](#Introduction)
@@ -17,7 +17,7 @@ TODO
 
 
 ## Purpose
-Ability to run Sitecore Queries in the Sitecore Admin. 
+Ability to display Sitecore Forms  submitted data.  
 
 
 ## Supported Sitecore Versions

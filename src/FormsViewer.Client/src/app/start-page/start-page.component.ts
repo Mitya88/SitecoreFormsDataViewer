@@ -118,14 +118,11 @@ export class StartPageComponent implements OnInit {
   exportFields: any;
   blob: any;
   alertAndClose() {
-    console.log(this.exportType);
     this.exportFields = this.selectedOptions();
-    console.log(this.exportFields)
 
     this.formsViewerService.exportFormData(this.selectedFormId, this.startDate, this.endDate, this.exportType, this.exportFields)
       .subscribe({
         next: response => {
-          console.log(response);
           this.blob = response;
           let filename = 'export.' + this.getExtension(this.exportType);
 
@@ -146,7 +143,7 @@ export class StartPageComponent implements OnInit {
 
   getExtension(exportType: any) {
     if (exportType == 'excel') {
-      return 'xls';
+      return 'xlsx';
     }
 
     return exportType;
@@ -189,15 +186,12 @@ export class StartPageComponent implements OnInit {
       next: response => {
         this.formEntries = response;
         this.isLoading = false;
-        console.log(this.formEntries.Headers);
         this.options = [];
         for (var i = 0; i < this.formEntries.Headers.length; i++) {
           this.options.push({ name: this.formEntries.Headers[i], value: this.formEntries.Headers[i], checked: true });
         }
-        console.log(this.options);
       }
     });
-    console.log(this.settings);
 
   }
 }

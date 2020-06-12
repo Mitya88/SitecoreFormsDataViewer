@@ -2,11 +2,11 @@
 {
     using FormsViewer.Service.Models;
     using FormsViewer.Service.Services;
-    using Sitecore.Configuration;
     using Sitecore.ContentSearch;
     using Sitecore.ContentSearch.SearchTypes;
     using Sitecore.ExperienceForms.Analytics.Reporting;
     using Sitecore.ExperienceForms.Configuration;
+    using Sitecore.ExperienceForms.Data.Entities;
     using Sitecore.ExperienceForms.Data.SqlServer;
     using Sitecore.ExperienceForms.Reporting.Models;
     using Sitecore.Services.Infrastructure.Web.Http;
@@ -17,13 +17,10 @@
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
-    using System.Text;
     using System.Web.Http;
     using System.Web.Http.Cors;
-    using System.Xml;
-    using System.Xml.Serialization;
 
-    //[Authorize]
+    [Authorize]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class FormsViewerApiController : ServicesApiController
     {
@@ -62,7 +59,6 @@
         {
             var provider = new SqlFormDataProvider(new SqlServerApiFactory(new SqlConnectionSettings(new FormsConfigurationSettings())));
             var result = provider.GetEntries(request.FormId, request.StartDate, request.EndDate);
-
 
             var response = new FormsViewerResponse
             {
@@ -130,42 +126,47 @@
         [HttpPost]
         public FormStatistics Statistics([FromBody]FormViewRequest request)
         {
-            var provider  = new FormStatisticsProvider(new ReportingQueryFactory(new ReportDataProviderFactory()));
+            var provider = new FormStatisticsProvider(new ReportingQueryFactory(new ReportDataProviderFactory()));
 
-            return provider.GetFormStatistics(request.FormId, 
-                request.StartDate.HasValue ? request.StartDate.Value : DateTime.MinValue, 
+            return provider.GetFormStatistics(request.FormId,
+                request.StartDate.HasValue ? request.StartDate.Value : DateTime.MinValue,
                 request.EndDate.HasValue ? request.EndDate.Value : DateTime.MaxValue);
         }
 
         [HttpPost]
-
         public HttpResponseMessage ExportFormData([FromBody]FormViewExportRequest request)
         {
-            
+            var provider = new SqlFormDataProvider(new SqlServerApiFactory(new SqlConnectionSettings(new FormsConfigurationSettings())));
+
+            var entries = provider.GetEntries(request.FormId, request.StartDate, request.EndDate);
             string formName = "sample";
             string fileName = string.Format("Export_{0}_{1}.csv", formName, DateTime.Now.ToString("yyyyMMdd_HHmmss"));
-            MemoryStream stream = new MemoryStream();
-            StreamWriter writer = new StreamWriter(stream);
-            writer.Write(CreateReport(request));
-            writer.Flush();
-            stream.Position = 0;
+            Stream stream = null;
+            if (request.ExportOption.Equals("excel", StringComparison.OrdinalIgnoreCase))
+            {
+                stream = new ExportService().CreateExcel(request, entries.ToList());
+                stream.Seek(0, SeekOrigin.Begin);
+            }
+            else
+            {
+                stream = new MemoryStream();
+                StreamWriter writer = new StreamWriter(stream);
+                writer.Write(CreateReport(request, entries.ToList()));
+                writer.Flush();
+                stream.Position = 0;
+            }
 
             HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
             result.Content = new StreamContent(stream);
-            //result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
             result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
             result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = fileName };
             return result;
         }
 
-        private string CreateReport(FormViewExportRequest request)
+        private string CreateReport(FormViewExportRequest request, List<FormEntry> entries)
         {
             var exportService = new ExportService();
             string result = string.Empty;
-
-            var provider = new SqlFormDataProvider(new SqlServerApiFactory(new SqlConnectionSettings(new FormsConfigurationSettings())));
-
-            var entries = provider.GetEntries(request.FormId, request.StartDate, request.EndDate);
 
             var response = new FormsViewerResponse();
 
@@ -217,17 +218,12 @@
             {
                 return exportService.ExportToXml(request, response.Entries.ToList());
             }
-            else if (request.ExportOption.Equals("excel", StringComparison.OrdinalIgnoreCase))
-            {
-                return exportService.ExportToExcel(request, entries.ToList());
-
-            }
             else if (request.ExportOption.Equals("csv", StringComparison.OrdinalIgnoreCase))
             {
-               return exportService.ExportToCsv(request, entries.ToList());
+                return exportService.ExportToCsv(request, entries.ToList());
             }
 
             return result;
-        }        
+        }
     }
 }

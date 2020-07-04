@@ -8,7 +8,7 @@
   </div>
 
   <div scPageAppHeader>
-    <sc-application-header text="Sitecore Forms Data Viewer"></sc-application-header>
+    <sc-application-header text="Sitecore Forms Data Viewer 1.0 - Beta"></sc-application-header>
   </div>
   <div scPageActionBar>
     <sc-action-bar>
@@ -25,13 +25,13 @@
           <p style="padding-top:6px; font-size:14px"><strong>Start Date</strong></p>
         </div>
         <div class="col-2">
-          <input type="date" [(ngModel)]="startDate" class="form-control" (change)="loadForms()"/>
+          <input type="date" [(ngModel)]="startDate" class="form-control" (change)="loadForms()" />
         </div>
         <div class="col-1">
           <p style="padding-top:6px; font-size:14px"><strong>End Date</strong></p>
         </div>
         <div class="col-2">
-          <input type="date" [(ngModel)]="endDate" class="form-control" (change)="loadForms()"/>
+          <input type="date" [(ngModel)]="endDate" class="form-control" (change)="loadForms()" />
         </div>
         <div class="col-1">
           <button scButton="primary" (click)="dialogService.open(export)">Export</button>
@@ -46,7 +46,7 @@
   </div>
 
   <article scPageContent class="p-4">
-    <div class="card mb-3">
+    <div class="card mb-3" *ngIf="!selectedForm">
       <p class="no-data">No forms selected</p>
     </div>
 
@@ -56,12 +56,13 @@
         <div class="row">
           <div class="col-11">
             <div class="row">
-              <p style="padding-left:12px; font-size:14px"><strong>Total Count: {{formEntries.Entries.length}}</strong></p>
+              <p style="padding-left:12px; font-size:14px"><strong>Total Count: {{formEntries.Entries.length}}</strong>
+              </p>
             </div>
             <div class="row">
               <table scTable>
                 <thead>
-                  <tr >
+                  <tr>
                     <th *ngFor='let header of formEntries.Headers'>{{header}}</th>
                   </tr>
                 </thead>
@@ -79,11 +80,12 @@
       </sc-progress-indicator-panel>
     </div>
   </article>
-  <aside scPageContext [show]="isEditing" class="bg-basic-white" >
+  <aside scPageContext [show]="isEditing" class="bg-basic-white">
     <div class="p3">
-      <p style="color:red;font-size: 14px;padding:5px;" class="bold" *ngIf="settings && !settings.XDbEnabled">Xdb is disabled! You cannot retrieve the form analytics data</p>
-      <div class="col-3" >
-       
+      <p style="color:red;font-size: 14px;padding:5px;" class="bold" *ngIf="settings && !settings.XDbEnabled">Xdb is
+        disabled! You cannot retrieve the form analytics data</p>
+      <div class="col-3">
+
         <table scTable *ngIf="formStatistics && formStatistics.SuccessSubmits && formStatistics.SuccessSubmits>-1">
           <thead>
             <tr>
@@ -104,9 +106,9 @@
             </tr>
           </tbody>
         </table>
-       
+
       </div>
-      
+
     </div>
     <div style="width: 300px;display:block;padding-left:30px">
       <canvas id="myChart" width="300" height="400"></canvas>
@@ -121,53 +123,55 @@
       <h4>Export</h4>
     </sc-dialog-header>
     <sc-dialog-body>
-      
+
       <div class="row">
         <div class="col-3">
           <h5>Start Date</h5>
         </div>
         <div class="col-1"></div>
         <div class="col-3">
-        <h5>End Date</h5> 
+          <h5>End Date</h5>
         </div>
       </div>
       <br>
       <div class="row">
         <div class="col-3">
-          <input type="date" class="form-control" [(ngModel)]="startDate"/>
+          <input type="date" class="form-control" [(ngModel)]="startDate" />
         </div>
         <div class="col-1"></div>
         <div class="col-3">
-          <input type="date" class="form-control" [(ngModel)]="endDate"/>
+          <input type="date" class="form-control" [(ngModel)]="endDate" />
         </div>
       </div>
       <br>
       <h5>Export Type</h5>
       <div class="row">
-        
+
         <div class="col-2">
-          <label class="container-rb"><input type="radio" name="mode" value="csv" [(ngModel)]="exportType">&nbsp; CSV  <span class="checkmark-rb"></span></label>
+          <label class="container-rb"><input type="radio" name="mode" value="csv" [(ngModel)]="exportType">&nbsp; CSV
+            <span class="checkmark-rb"></span></label>
         </div>
         <div class="col-2">
-          <label class="container-rb"><input type="radio" name="mode" value="xml" [(ngModel)]="exportType">&nbsp; XML<span class="checkmark-rb"></span></label>
+          <label class="container-rb"><input type="radio" name="mode" value="xml" [(ngModel)]="exportType">&nbsp;
+            XML<span class="checkmark-rb"></span></label>
         </div>
         <div class="col-2">
-          <label class="container-rb"><input type="radio" name="mode" value="excel" [(ngModel)]="exportType">&nbsp; Excel<span class="checkmark-rb"></span></label>
+          <label class="container-rb"><input type="radio" name="mode" value="excel" [(ngModel)]="exportType">&nbsp;
+            Excel<span class="checkmark-rb"></span></label>
         </div>
       </div>
       <h5>Include fields</h5>
       <div class="row" *ngIf="parent.formEntries">
         <div class="col-3" *ngFor='let option of parent.options'>
-         
-          <label class="container" >{{option.name}}
-            <input type="checkbox" name="options" value="{{option.value}}"
-            [(ngModel)]="option.checked">
+
+          <label class="container">{{option.name}}
+            <input type="checkbox" name="options" value="{{option.value}}" [(ngModel)]="option.checked">
             <span class="checkmark"></span>
-          </label>   
-        <!-- <label  *ngFor='let header of formEntries.Headers'><input type="checkbox" name="header"  value="header" [(ngModel)]="exportFields">&nbsp; {{header}}</label> -->
+          </label>
+          <!-- <label  *ngFor='let header of formEntries.Headers'><input type="checkbox" name="header"  value="header" [(ngModel)]="exportFields">&nbsp; {{header}}</label> -->
+        </div>
       </div>
-      </div>
-    
+
 
     </sc-dialog-body>
     <sc-dialog-footer>
@@ -176,5 +180,3 @@
     </sc-dialog-footer>
   </sc-dialog>
 </template>
-
-

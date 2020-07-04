@@ -16,7 +16,7 @@
     /// <summary>
     /// Export Service
     /// </summary>
-    public class ExportService
+    public class ExportService : IExportService
     {
         /// <summary>
         /// The file download pattern

@@ -1,5 +1,7 @@
 namespace FormsViewer.Service.DI
 {
+    using FormsViewer.Service.Controllers;
+    using FormsViewer.Service.Services;
     using Microsoft.Extensions.DependencyInjection;
     using Sitecore.DependencyInjection;
 
@@ -15,6 +17,8 @@ namespace FormsViewer.Service.DI
         /// <param name="serviceCollection">The service collection.</param>
         public void Configure(IServiceCollection serviceCollection)
         {
+            serviceCollection.AddTransient<IExportService, ExportService>();
+            serviceCollection.AddTransient<FormsViewerApiController>();
         }
     }
 }

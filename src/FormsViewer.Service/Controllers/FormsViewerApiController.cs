@@ -6,8 +6,10 @@
     using Sitecore.ContentSearch.SearchTypes;
     using Sitecore.ExperienceForms.Analytics.Reporting;
     using Sitecore.ExperienceForms.Configuration;
+    using Sitecore.ExperienceForms.Data;
     using Sitecore.ExperienceForms.Data.Entities;
     using Sitecore.ExperienceForms.Data.SqlServer;
+    using Sitecore.ExperienceForms.Reporting;
     using Sitecore.ExperienceForms.Reporting.Models;
     using Sitecore.Services.Infrastructure.Web.Http;
     using System;
@@ -28,8 +30,23 @@
 
         private const string IndexName = "sitecore_master_index";
 
-        public FormsViewerApiController()
+        private readonly IFormDataProvider dataProvider;
+
+        private readonly IExportService exportService;
+
+        private readonly IFormStatisticsProvider statisticsProvider;
+
+        public FormsViewerApiController(IFormDataProvider dataProvider, IExportService exportService):this(dataProvider, exportService, null)
         {
+            this.dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
+            this.exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
+        }
+
+        public FormsViewerApiController(IFormDataProvider dataProvider, IExportService exportService, IFormStatisticsProvider statisticsProvider)
+        {
+            this.dataProvider = dataProvider ?? throw new ArgumentNullException(nameof(dataProvider));
+            this.exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
+            this.statisticsProvider = statisticsProvider;
         }
 
         [HttpGet]
@@ -57,8 +74,7 @@
         [HttpPost]
         public FormsViewerResponse Detail([FromBody]FormViewRequest request)
         {
-            var provider = new SqlFormDataProvider(new SqlServerApiFactory(new SqlConnectionSettings(new FormsConfigurationSettings())));
-            var result = provider.GetEntries(request.FormId, request.StartDate, request.EndDate);
+            var result = this.dataProvider.GetEntries(request.FormId, request.StartDate, request.EndDate);
 
             var response = new FormsViewerResponse
             {
@@ -126,9 +142,7 @@
         [HttpPost]
         public FormStatistics Statistics([FromBody]FormViewRequest request)
         {
-            var provider = new FormStatisticsProvider(new ReportingQueryFactory(new ReportDataProviderFactory()));
-
-            return provider.GetFormStatistics(request.FormId,
+            return this.statisticsProvider.GetFormStatistics(request.FormId,
                 request.StartDate.HasValue ? request.StartDate.Value : DateTime.MinValue,
                 request.EndDate.HasValue ? request.EndDate.Value : DateTime.MaxValue);
         }
@@ -136,15 +150,13 @@
         [HttpPost]
         public HttpResponseMessage ExportFormData([FromBody]FormViewExportRequest request)
         {
-            var provider = new SqlFormDataProvider(new SqlServerApiFactory(new SqlConnectionSettings(new FormsConfigurationSettings())));
-
-            var entries = provider.GetEntries(request.FormId, request.StartDate, request.EndDate);
+            var entries = this.dataProvider.GetEntries(request.FormId, request.StartDate, request.EndDate);
             string formName = "sample";
             string fileName = string.Format("Export_{0}_{1}.csv", formName, DateTime.Now.ToString("yyyyMMdd_HHmmss"));
             Stream stream = null;
             if (request.ExportOption.Equals("excel", StringComparison.OrdinalIgnoreCase))
             {
-                stream = new ExportService().CreateExcel(request, entries.ToList());
+                stream = this.exportService.CreateExcel(request, entries.ToList());
                 stream.Seek(0, SeekOrigin.Begin);
             }
             else
@@ -165,7 +177,6 @@
 
         private string CreateReport(FormViewExportRequest request, List<FormEntry> entries)
         {
-            var exportService = new ExportService();
             string result = string.Empty;
 
             var response = new FormsViewerResponse();

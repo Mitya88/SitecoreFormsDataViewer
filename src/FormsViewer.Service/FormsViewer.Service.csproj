@@ -534,6 +534,7 @@
     <Compile Include="Models\SettingsResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegisterHttpRoutes.cs" />
+    <Compile Include="Services\IExportService.cs" />
     <Compile Include="Services\ExportService.cs" />
   </ItemGroup>
   <ItemGroup>

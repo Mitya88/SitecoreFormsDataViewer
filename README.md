@@ -11,9 +11,8 @@ The repository contains source code and documentation for the Sitecore Forms Dat
 
 # Introduction
 
-TODO
 
-* [BlogPost](https://tinyurl.com/ybq26ay8)
+* [BlogPost](https://medium.com/@mitya_1988/beta-is-available-for-sitecore-forms-data-viewer-d169b6430da0)
 
 
 ## Purpose

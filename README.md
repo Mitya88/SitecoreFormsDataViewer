@@ -28,6 +28,7 @@ Ability to display Sitecore Forms submitted data and analytics data. It gives ab
 - Sitecore 9.1 Update-1
 - Sitecore 9.2
 - Sitecore 9.3 
+- Sitecore 10
 
 ## Releases
 - 1.0-beta  - [package](sc.package/Sitecore.Forms.DataViewer-1.0-beta.zip)
